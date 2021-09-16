@@ -1,3 +1,4 @@
+import { routes } from 'discord-api-types'
 import parser from "discord-command-parser";
 
 export = class commandService {
@@ -8,5 +9,9 @@ export = class commandService {
     bot.client.on("messageCreate", async (msg) => {
       console.log(Object.getOwnPropertyNames(msg));
     });
+  }
+
+  registerCommand(command) {
+    this.commands[command.name] = command;
   }
 };
