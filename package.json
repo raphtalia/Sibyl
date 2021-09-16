@@ -1,0 +1,23 @@
+{
+  "name": "sibyl",
+  "version": "1.0.0",
+  "description": "",
+  "main": "dist/index.js",
+  "scripts": {
+    "start": "tsc && node dist/index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "tslint": "^6.1.3",
+    "typescript": "^4.3.5"
+  },
+  "dependencies": {
+    "discord-command-parser": "^1.5.3",
+    "discord-reply": "^0.1.2",
+    "discord.js": "^13.1.0",
+    "dotenv": "^10.0.0"
+  }
+}
