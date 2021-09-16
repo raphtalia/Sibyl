@@ -1,0 +1,9 @@
+{
+	"files.eol": "\n",
+	"editor.formatOnSave": true,
+	"prettier.tabWidth": 4,
+
+	"[yaml]": {
+		"editor.defaultFormatter": "esbenp.prettier-vscode"
+	}
+}
