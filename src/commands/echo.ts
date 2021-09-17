@@ -1,7 +1,7 @@
 export = {
   name: "echo",
   description: "Echo a message.",
-  args: [
+  arguments: [
     {
       name: "message",
       type: "STRING",
@@ -9,7 +9,7 @@ export = {
     },
   ],
 
-  async run(commandContext) {
-
+  async execute(commandContext) {
+    commandContext.message.reply('test')
   }
 }
