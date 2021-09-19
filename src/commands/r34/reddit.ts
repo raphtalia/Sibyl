@@ -1,18 +1,30 @@
 import { CommandContext } from "../../types";
 
+import { MessageEmbed, TextChannel } from "discord.js";
+
 export = {
   name: "reddit",
   description: "Sends a reddit image",
   arguments: [
     {
-      name: "tags",
-      description: "Tags to search for",
+      name: "subreddit",
+      description: "subreddit to search",
       required: true,
-      multiple: true,
+      type: "STRING"
     },
   ],
 
   async execute(commandContext: CommandContext) {
-    commandContext.message.reply(commandContext.arguments.tags.toString());
+    // const message = commandContext.message;
+    // if (
+    //   message.guild &&
+    //   message.channel instanceof TextChannel &&
+    //   !message.channel.nsfw
+    // ) {
+    //   message.reply("This command can only be used in NSFW channels or DMs.");
+    //   return;
+    // }
+
+    // message.reply({ embeds: [embed] });
   },
 };
