@@ -7,5 +7,6 @@ export = {
 
     ERRORS: {
         UNKNOWN_COMMAND: 'Invalid command, run **!help** for help.',
+        SLASH_ONLY_COMMAND: 'This command can only be as a slash command.',
     }
 }

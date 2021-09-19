@@ -8,8 +8,12 @@ class commandHandler {
     const commandService = bot.services.commandService;
 
     getModules(commandsPath).forEach((module) => {
-      const handler = require(path.resolve(`${commandsPath}/${module.path}`));
-      commandService.registerCommand(handler)
+      try {
+        const handler = require(path.resolve(`${commandsPath}/${module.path}`));
+        commandService.registerCommand(handler);
+      } catch (e) {
+        console.error(e);
+      }
     });
 
     commandService.reloadSlashCommands();
