@@ -22,6 +22,7 @@
     "discord.js": "^13.1.0",
     "dotenv": "^10.0.0",
     "e621": "^1.0.8",
+    "fuzzy-matching": "^0.4.3",
     "uwuifier": "^4.0.4"
   }
 }
