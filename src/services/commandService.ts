@@ -6,6 +6,8 @@ import { REST } from "@discordjs/rest";
 import { Routes } from "discord-api-types/v9";
 import { SlashCommandBuilder } from "@discordjs/builders";
 import { parse } from "discord-command-parser";
+import Fuzzy from "fuzzy-matching";
+import format from "string-format";
 
 const rest = new REST({ version: "9" }).setToken(process.env.DISCORD_API_KEY);
 
@@ -199,11 +201,13 @@ async function getArguments(
 }
 
 export = class commandService {
+  _bot: Bot;
+  _fuzzyCommandSearcher;
   commands = {};
-  bot: Bot;
 
   constructor(bot: Bot) {
-    this.bot = bot;
+    this._bot = bot;
+    this._fuzzyCommandSearcher = new Fuzzy();
 
     console.log("[CommandService] Initializing");
     bot.client.on("messageCreate", async (msg) => {
@@ -213,28 +217,30 @@ export = class commandService {
 
       if (!parsedCommand.success) return;
 
-      const command: Command = this.commands[parsedCommand.command];
+      const parsedCommandName = parsedCommand.command
+      const command: Command = this.commands[parsedCommandName];
       if (command) {
         if (!command.slashOnly) {
           if (msg.guild) {
             console.log(
-              `[CommandService] Command: ${parsedCommand.command} from ${msg.author.tag} in ${msg.guild.name}`
+              `[CommandService] Command: ${parsedCommandName} from ${msg.author.tag} in ${msg.guild.name}`
             );
           } else {
             console.log(
-              `[CommandService] Command: ${parsedCommand.command} from ${msg.author.tag} in DM`
+              `[CommandService] Command: ${parsedCommandName} from ${msg.author.tag} in DM`
             );
           }
 
           if (command) {
-            this.commands[parsedCommand.command].execute({
+            this.commands[parsedCommandName].execute({
+              bot: this._bot,
               message: msg,
               arguments: await getArguments(command, msg),
             });
           }
         } else {
           console.warn(
-            `[CommandService] User ${msg.author.tag} attempted to run slash-only command ${parsedCommand.command}`
+            `[CommandService] User ${msg.author.tag} attempted to run slash-only command ${parsedCommandName}`
           );
 
           msg.reply(constants.ERRORS.SLASH_ONLY_COMMAND);
@@ -242,15 +248,20 @@ export = class commandService {
       } else {
         if (msg.guild) {
           console.warn(
-            `[CommandService] Command not found: ${parsedCommand.command} from ${msg.author.tag} in ${msg.guild.name}`
+            `[CommandService] Command not found: ${parsedCommandName} from ${msg.author.tag} in ${msg.guild.name}`
           );
         } else {
           console.warn(
-            `[CommandService] Command not found: ${parsedCommand.command} from ${msg.author.tag} in DM`
+            `[CommandService] Command not found: ${parsedCommandName} from ${msg.author.tag} in DM`
           );
         }
 
-        msg.reply(constants.ERRORS.UNKNOWN_COMMAND);
+        const similarCommand = this.getCommandFuzzy(parsedCommandName);
+        if (similarCommand) {
+          msg.reply(format(constants.ERRORS.TYPO_COMMAND, parsedCommandName, similarCommand.name));
+        } else {
+          msg.reply(constants.ERRORS.UNKNOWN_COMMAND);
+        }
       }
     });
 
@@ -271,6 +282,7 @@ export = class commandService {
           }
 
           command.execute({
+            bot: this._bot,
             message: interaction,
             arguments: await getArguments(command, interaction),
           });
@@ -291,6 +303,7 @@ export = class commandService {
           }
 
           subcommand.execute({
+            bot: this._bot,
             message: interaction,
             arguments: await getArguments(subcommand, interaction),
           });
@@ -303,16 +316,25 @@ export = class commandService {
     });
   }
 
+  getCommandFuzzy(commandName: string) {
+    commandName = commandName.toLowerCase();
+
+    let match = this._fuzzyCommandSearcher.get(commandName);
+    if (match.distance > constants.COMMAND_FUZZY_CONFIDENCE) {
+      return this.commands[match.value];
+    }
+
+    return null;
+  }
+
   registerCommand(command: Command) {
     // Check if command is valid
     if (!command.name) {
       throw "Command name is required";
     }
-    if (!command.arguments && !command.slashOnly) {
-      throw `Arguments are required for command ${command.name}`;
-    }
+    let commandName = command.name.toLowerCase()
     if (!command.execute) {
-      throw `Execute method is required for command ${command.name}`;
+      throw `Execute method is required for command ${commandName}`;
     }
 
     const args = command.arguments;
@@ -320,26 +342,27 @@ export = class commandService {
       let nonRequire = false;
       for (const [i, argument] of args.entries()) {
         if (!argument.name) {
-          throw `Command ${command.name} argument #${i} name is required`;
+          throw `Command ${commandName} argument #${i} name is required`;
         }
         if (!argument.type) {
-          throw `Command ${command.name} argument ${argument.name} type is required`;
+          throw `Command ${commandName} argument ${argument.name} type is required`;
         }
         if (argument.required) {
           if (nonRequire) {
-            throw `Command ${command.name} argument ${argument.name} must be placed before non-required arguments`;
+            throw `Command ${commandName} argument ${argument.name} must be placed before non-required arguments`;
           }
         } else {
           nonRequire = true;
         }
         if (argument.multiple && i != args.length - 1) {
-          throw `Command ${command.name} argument ${argument.name} must be placed at the end for multiple values`;
+          throw `Command ${commandName} argument ${argument.name} must be placed at the end for multiple values`;
         }
       }
     }
 
-    this.commands[command.name] = command;
-    console.log(`[CommandService] Registered command: ${command.name}`);
+    this.commands[commandName] = command;
+    this._fuzzyCommandSearcher.add(commandName);
+    console.log(`[CommandService] Registered command: ${commandName}`);
   }
 
   reloadSlashCommands() {
@@ -367,9 +390,9 @@ export = class commandService {
       console.log("[CommandService] Reloading slash commands.");
 
       try {
-        let clientId = this.bot.client.user.id;
+        let clientId = this._bot.client.user.id;
         const promises = [];
-        this.bot.client.guilds.cache.map((guild) => {
+        this._bot.client.guilds.cache.map((guild) => {
           console.log(
             `[CommandService] Reloading slash commands for ${guild.name}`
           );

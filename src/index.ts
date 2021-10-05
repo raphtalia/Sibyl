@@ -39,6 +39,7 @@ client
       const service = require(`${servicesPath}/${module.path}`);
       services[module.name] = new service({
         client: client,
+        services: services,
       });
     });
 

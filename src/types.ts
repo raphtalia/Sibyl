@@ -6,6 +6,7 @@ export type Bot = {
 };
 
 export type CommandContext = {
+  bot: Bot;
   message: Message | CommandInteraction;
   arguments: { [key: string]: boolean | Channel | number | User | Role | string };
 }

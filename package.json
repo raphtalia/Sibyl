@@ -17,12 +17,15 @@
   "dependencies": {
     "@discordjs/builders": "^0.5.0",
     "@discordjs/rest": "^0.1.0-canary.0",
+    "date-fns": "^2.24.0",
     "discord-api-types": "^0.22.0",
     "discord-command-parser": "^1.5.3",
     "discord.js": "^13.1.0",
     "dotenv": "^10.0.0",
     "e621": "^1.0.8",
     "fuzzy-matching": "^0.4.3",
+    "string-format": "^2.0.0",
+    "urban-dictionary": "^3.0.2",
     "uwuifier": "^4.0.4"
   }
 }
