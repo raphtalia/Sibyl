@@ -1,5 +1,6 @@
 import Sibyl from '..';
 
+/*
 type ServiceCallbackFn = (sibyl: Sibyl) => Promise<void>;
 
 export default class Service {
@@ -29,5 +30,30 @@ export default class Service {
 		if (this.stopCallbackFn) {
 			await this.stopCallbackFn(sibyl);
 		}
+	}
+}
+*/
+
+export default class Service {
+	public readonly name: string;
+	public readonly sibyl = Sibyl;
+	private methods: { [name: string]: (service: Service, ...args: any[]) => Promise<any> } = {};
+
+	constructor(options: { name: string }) {
+		this.name = options.name;
+
+		return new Proxy(this, this.methods);
+	}
+
+	public async start() {
+		await this.methods.start(this);
+	}
+
+	public async stop() {
+		await this.methods?.stop(this);
+	}
+
+	public register(name: string, fn: (service: Service, ...args: any[]) => Promise<any>) {
+		this.methods[name] = fn;
 	}
 }

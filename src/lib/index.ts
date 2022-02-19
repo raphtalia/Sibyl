@@ -8,14 +8,14 @@ import services from './services';
 
 // require("discord-reply");
 
-export default class Sibyl {
+class Sibyl {
 	public readonly services: { [name: string]: Service } = services;
 	public readonly client: Client;
+	private intents: number[] = [];
 
 	constructor(intents: number[] = []) {
-		this.client = new Client({
-			intents: uniq_fast(intents.concat(INTENTS))
-		});
+		this.intents = this.intents.concat(intents);
+		this.client = new Client({ intents: uniq_fast(this.intents) });
 	}
 
 	public start(apiKey: string): Promise<this> {
@@ -25,7 +25,7 @@ export default class Sibyl {
 
 				await Promise.all(
 					Object.values(this.services).map((service) => {
-						return service.start(this);
+						return service.start();
 					})
 				);
 
@@ -35,6 +35,11 @@ export default class Sibyl {
 				reject(e);
 			}
 		});
+	}
+
+	public addIntent(intent: number): this {
+		this.client.options.intents = uniq_fast([...this.intents, intent]);
+		return this;
 	}
 
 	public registerService(service: Service): this {
@@ -58,3 +63,5 @@ export default class Sibyl {
 		return this;
 	}
 }
+
+export default new Sibyl(INTENTS);

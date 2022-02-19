@@ -8,6 +8,6 @@ dotenvConfig({ path: '../.env' });
 
 import Sibyl from './lib';
 
-await new Sibyl().start(process.env.DISCORD_API_KEY as string);
+await Sibyl.start(process.env.DISCORD_API_KEY as string);
 
 console.log('Running!');

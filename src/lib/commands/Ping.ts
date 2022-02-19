@@ -5,7 +5,7 @@ export default new Command(
 		name: 'ping',
 		description: 'pong!'
 	},
-	async (_, message) => {
-		message.reply('pong!');
+	async (context) => {
+		context.message.reply('pong!');
 	}
 );

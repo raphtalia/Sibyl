@@ -1,6 +1,7 @@
 import type { GuildMember, Message, User } from 'discord.js';
 import type CommandArgument from '../models/CommandArgument';
 import type CommandExecutor from '../models/CommandExecutor';
+import CommandContext from './CommandContext';
 
 export default class Command {
 	public readonly name: string;
@@ -30,7 +31,7 @@ export default class Command {
 
 	public async execute(user: User | GuildMember, message: Message, args: string[]): Promise<this> {
 		try {
-			await this.callbackFn(user, message, args);
+			await this.callbackFn(new CommandContext(user, message, args));
 		} catch (e) {
 			console.error(e);
 		}

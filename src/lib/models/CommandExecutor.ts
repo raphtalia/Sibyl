@@ -1,9 +1,5 @@
-import type { GuildMember, Message, User } from 'discord.js';
+import type CommandContext from '../classes/CommandContext';
 
-export type CommandExecutor = (
-	user: User | GuildMember,
-	message: Message,
-	args: string[]
-) => Promise<void>;
+export type CommandExecutor = (context: CommandContext) => Promise<void>;
 
 export default CommandExecutor;
